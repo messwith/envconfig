@@ -9,6 +9,10 @@ import (
 	"testing"
 )
 
+type Embedded struct {
+	Var string
+}
+
 type Specification struct {
 	Debug                        bool
 	Port                         int
@@ -22,10 +26,13 @@ type Specification struct {
 	RequiredVar                  string `required:"true"`
 	NoPrefixDefault              string `envconfig:"BROKER" default:"127.0.0.1"`
 	RequiredDefault              string `required:"true" default:"foo2bar"`
+	NewField					 string `envconfig:"NEWFIELD"`
+	Embedded
 }
 
 func TestProcess(t *testing.T) {
 	var s Specification
+	s.NewField = "NEWFIELD"
 	os.Clearenv()
 	os.Setenv("ENV_CONFIG_DEBUG", "true")
 	os.Setenv("ENV_CONFIG_PORT", "8080")
@@ -33,6 +40,7 @@ func TestProcess(t *testing.T) {
 	os.Setenv("ENV_CONFIG_USER", "Kelsey")
 	os.Setenv("SERVICE_HOST", "127.0.0.1")
 	os.Setenv("ENV_CONFIG_REQUIREDVAR", "foo")
+	os.Setenv("ENV_CONFIG_EMBEDDED_VAR", "var")
 	err := Process("env_config", &s)
 	if err != nil {
 		t.Error(err.Error())
@@ -54,6 +62,12 @@ func TestProcess(t *testing.T) {
 	}
 	if s.RequiredVar != "foo" {
 		t.Errorf("expected %s, got %s", "foo", s.RequiredVar)
+	}
+	if s.NewField != "NEWFIELD" {
+		t.Errorf("expected %s, got %s", "NEWFIELD", s.NewField)
+	}
+	if s.Var != "var" {
+		t.Errorf("expected %s, got %s", "var", s.Var)
 	}
 }
 

@@ -44,6 +44,9 @@ func Process(prefix string, spec interface{}) error {
 				fieldName = alt
 			}
 			key := strings.ToUpper(fmt.Sprintf("%s_%s", prefix, fieldName))
+			if f.Kind() == reflect.Struct {
+				Process(key, f.Addr().Interface())
+			}
 			value := os.Getenv(key)
 			if value == "" && alt != "" {
 				key := strings.ToUpper(fieldName)
